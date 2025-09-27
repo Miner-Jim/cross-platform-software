@@ -1,0 +1,37 @@
+spring:
+    profiles:
+        active: dev
+    application:
+        name: "Demo"
+        version: "0.1"
+
+---
+
+spring:
+    config:
+        activate:
+            on-profile: dev
+    datasource:
+        url: jdbc:postgresql://localhost:5432/smarthome
+        username: postgres
+        password: starcraftwow1
+        driver-class-name: org.postgresql.Driver
+    jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        hibernate:
+            ddl-auto: create-drop
+        show-sql: true
+
+
+server:
+    port: 8080
+
+---
+
+spring:
+    config:
+        activate:
+            on-profile: prod
+
+server:
+    port: 9001
