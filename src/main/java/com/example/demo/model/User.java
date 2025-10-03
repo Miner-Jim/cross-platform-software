@@ -5,6 +5,8 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -25,6 +27,7 @@ public class User {
 
     // Связь: Один пользователь может управлять несколькими комнатами
     @OneToMany(mappedBy = "manager", cascade = CascadeType.ALL)
+    @JsonManagedReference("user-rooms")
     private List<Room> managedRooms = new ArrayList<>();
 
     // Связь с ролями (будет позже)

@@ -3,6 +3,8 @@ package com.example.demo.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -24,12 +26,14 @@ public class Room {
 
     @ManyToOne
     @JoinColumn(name = "manager_id") // Внешний ключ в таблице room
+    @JsonBackReference("user-rooms")
     private User manager;
 
     @Column(nullable = false)
     private String location;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+    @JsonManagedReference("room-devices")
     private List<Device> devices = new ArrayList<>();
 
 
