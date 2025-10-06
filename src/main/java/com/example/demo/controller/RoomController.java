@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.Service.RoomService;
-import com.example.demo.Service.UserService;
 import com.example.demo.model.Room;
 import com.example.demo.model.User;
+import com.example.demo.service.RoomService;
+import com.example.demo.service.UserService;
 
 
 

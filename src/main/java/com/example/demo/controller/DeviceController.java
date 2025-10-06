@@ -2,7 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Device;
 import com.example.demo.model.DeviceType;
-import com.example.demo.Service.DeviceService;
+import com.example.demo.service.DeviceService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
