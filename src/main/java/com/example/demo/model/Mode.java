@@ -14,12 +14,9 @@ public class Mode {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, unique = true) // Название режима должно быть уникальным
-    private ModeType modeType; // Тип режима из enum
+    @Column(nullable = false, unique = true)
+    private ModeType modeType; 
 
-    // Связь "Один Режим активирует много Устройств"
-    // Это ManyToMany, потому что один режим может управлять разными устройствами,
-    // и одно устройство может использоваться в разных режимах.
     @ManyToMany
     @JoinTable(
         name = "mode_device",
