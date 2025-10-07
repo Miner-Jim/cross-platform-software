@@ -5,5 +5,7 @@ public enum DeviceType {
     COFFEE_MACHINE,
     SPEAKERS,
     KETTLE,
-    MICROWAVE
+    MICROWAVE,
+    CONDITIONER,
+    TELEVISION
 }
