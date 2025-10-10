@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Entity
@@ -30,6 +31,7 @@ public class Room {
     private User manager;
 
     @Column(nullable = false)
+    @NotBlank(message = "Название комнаты не может быть пустым")
     private String location;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)

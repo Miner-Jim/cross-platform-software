@@ -1,6 +1,9 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +20,13 @@ public class User {
     private Long id;
 
     @Column(nullable = false, unique = true)
+    @NotBlank()
+    @Size(min = 2, max = 20)
     private String username;
 
     @Column(nullable = false)
+    @NotBlank(message = "Пароль не может быть пустым")
+    @Size(min = 6, max = 20)
     private String password;
 
     @Column(nullable = false)

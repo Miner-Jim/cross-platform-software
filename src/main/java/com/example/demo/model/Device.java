@@ -11,6 +11,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 
@@ -21,6 +23,7 @@ public class Device {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Название устройства обязательно")
     @Column(nullable = false)
     private String title;
 
@@ -28,6 +31,7 @@ public class Device {
     @Column(nullable = false)
     private DeviceType type;
 
+    @Min(value = 0, message = "Мощность не может быть отрицательной")
     private double power;
 
     private boolean active;
