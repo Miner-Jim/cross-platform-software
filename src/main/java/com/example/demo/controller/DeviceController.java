@@ -4,10 +4,13 @@ import com.example.demo.model.Device;
 import com.example.demo.model.DeviceType;
 import com.example.demo.service.DeviceService;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestBody;
+
 import java.util.List;
 
 @RestController
@@ -22,8 +25,16 @@ public class DeviceController {
     
     // GET /api/devices - получить все устройства
     @GetMapping
-    public List<Device> getAllDevices() {
-        return deviceService.getAllDevices();
+    public ResponseEntity<Page<Device>> getAllDevices(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) DeviceType type,
+            @RequestParam(required = false) Double minPower,
+            @RequestParam(required = false) Double maxPower, 
+            @RequestParam(required = false) Boolean active,
+            @PageableDefault(page = 0, size = 3, sort = "title") Pageable pageable) {
+        
+        Page<Device> devices = deviceService.getDevicesByFilter(title, type, minPower, maxPower, active, pageable);
+        return ResponseEntity.ok(devices);
     }
     
     // GET /api/devices/{id} - получить устройство по ID
@@ -64,11 +75,5 @@ public class DeviceController {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-    
-    // GET /api/devices/type/{type} - получить устройства по типу
-    @GetMapping("/type/{type}")
-    public List<Device> getDevicesByType(@PathVariable DeviceType type) {
-        return deviceService.getDevicesByType(type);
     }
 }

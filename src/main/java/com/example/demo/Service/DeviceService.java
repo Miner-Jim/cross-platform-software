@@ -2,11 +2,15 @@ package com.example.demo.service;
 
 import java.util.List;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.example.demo.model.Device;
 import com.example.demo.model.DeviceType;
 import com.example.demo.repository.DeviceRepository;
+import com.example.demo.specification.DeviceSpecification;
 
 @Service
 public class DeviceService {
@@ -16,6 +20,13 @@ public class DeviceService {
         this.deviceRepository = deviceRepository;
     }
     
+    public Page<Device> getDevicesByFilter(String title, DeviceType type, 
+                                         Double minPower, Double maxPower, 
+                                         Boolean active, Pageable pageable) {
+        Specification<Device> spec = DeviceSpecification.withFilter(title, type, minPower, maxPower, active);
+        return deviceRepository.findAll(spec, pageable);
+    }
+
     // Сохранить новое устройство
     public Device createDevice(Device device) {
         return deviceRepository.save(device);
