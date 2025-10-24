@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.UserCreateDto;
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
 
@@ -46,6 +47,17 @@ public class UserController {
     public ResponseEntity<User> createUser(@RequestBody User user) {
         User createdUser = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<User> createUser(@RequestBody UserCreateDto userCreateDto) {
+        try {
+            User createdUser = userService.createUserWithRole(userCreateDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+        } 
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/{id}")

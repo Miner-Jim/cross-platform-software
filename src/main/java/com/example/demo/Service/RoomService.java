@@ -13,6 +13,16 @@ import com.example.demo.repository.RoomRepository;
 public class RoomService {
     private final RoomRepository roomRepository;
     
+
+     public List<Room> getRoomsByManager(Long managerId) {
+        return roomRepository.findByManagerId(managerId);
+    }
+    
+    public boolean isRoomManager(Long roomId, Long userId) {
+        Room room = roomRepository.findById(roomId).orElse(null);
+        return room != null && room.getManager() != null && room.getManager().getId().equals(userId);
+    }
+
     public RoomService(RoomRepository roomRepository) {
         this.roomRepository = roomRepository;
     }
@@ -51,4 +61,7 @@ public class RoomService {
         }
         return false;
     }
+
+
+    
 }

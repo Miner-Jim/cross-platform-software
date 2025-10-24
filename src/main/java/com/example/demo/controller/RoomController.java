@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,19 +34,35 @@ public class RoomController {
     }
 
     @GetMapping
-    public List<Room> getAllRooms() {
-        return roomService.getAllRooms();
+     public List<Room> getAllRooms(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userService.getUserByUsername(username);
+        
+        // ✅ USER видит только свои комнаты, ADMIN - все
+        if (user.getRole().getName().equals("USER")) {
+            return roomService.getRoomsByManager(user.getId());
+        } else {
+            return roomService.getAllRooms();
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Room> getRoomById(@PathVariable Long id) {
+    public ResponseEntity<Room> getRoomById(@PathVariable Long id, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userService.getUserByUsername(username);
+        
         Room room = roomService.getRoomById(id);
-        if (room != null) {
-            return ResponseEntity.ok(room);
-        }
-        else {
+        if (room == null) {
             return ResponseEntity.notFound().build();
         }
+        
+        // ✅ USER может смотреть только свои комнаты
+        if (user.getRole().getName().equals("USER") && 
+            !roomService.isRoomManager(id, user.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        return ResponseEntity.ok(room);
     }
 
      @PostMapping

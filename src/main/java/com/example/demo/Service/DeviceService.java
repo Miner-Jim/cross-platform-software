@@ -68,4 +68,19 @@ public class DeviceService {
         }
         return false;
     }
+
+
+   
+    public Page<Device> getDevicesByUserRooms(Long managerId, Pageable pageable) {
+        return deviceRepository.findByRoomManagerId(managerId, pageable);
+    }
+    
+    
+    public Page<Device> getDevicesByUserRoomsWithFilter(Long managerId, String title, DeviceType type, 
+                                                      Double minPower, Double maxPower, Boolean active, 
+                                                      Pageable pageable) {
+        //Пока используем фильтрацию только по type и active
+        return deviceRepository.findByManagerIdWithFilter(managerId, type, active, pageable);
+    }
 }
+

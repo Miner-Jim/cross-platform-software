@@ -16,26 +16,40 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
 public class Room {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ToString.Include
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "manager_id") // Внешний ключ в таблице room
+    @JoinColumn(name = "manager_id")
     @JsonBackReference("user-rooms")
+    // ✅ НЕТ @ToString.Include
     private User manager;
 
     @Column(nullable = false)
     @NotBlank(message = "Название комнаты не может быть пустым")
+    @ToString.Include
     private String location;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     @JsonManagedReference("room-devices")
+    // ✅ НЕТ @ToString.Include
     private List<Device> devices = new ArrayList<>();
 
 
