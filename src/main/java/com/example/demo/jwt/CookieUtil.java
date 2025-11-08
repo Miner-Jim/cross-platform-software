@@ -42,11 +42,11 @@ public class CookieUtil {
         .build();
     }
 
-    // public HttpCookie deleteRefreshTokenCookie() {
-    //     return ResponseCookie.from(refreshName, "")
-    //     .maxAge(0)
-    //     .httpOnly(true)
-    //     .path("/")
-    //     .build();
-    // }
+    public HttpCookie deleteRefreshTokenCookie() {
+        return ResponseCookie.from(refreshName, "")
+        .maxAge(0)
+        .httpOnly(true)
+        .path("/")
+        .build();
+    }
 }

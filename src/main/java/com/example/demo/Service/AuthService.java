@@ -102,4 +102,28 @@ public class AuthService {
         return ResponseEntity.ok().headers(headers).body(new LoginResponse(true, user.getRole().getName()));
     }
 
+    public ResponseEntity<LoginResponse> refresh(String refresToken) {
+        if (!jwtTokenProvider.validateToken(refresToken))
+            throw new RuntimeException("Invalid refresh token");
+        User user = userService.getUserByUsername(jwtTokenProvider.getUsername(refresToken));
+        HttpHeaders headers = new HttpHeaders();
+        Token newAccess = jwtTokenProvider.generateAccessToken(Map.of("role", user.getRole().getAuthority()),
+                accessTokenDurationMinute, ChronoUnit.MINUTES, user);
+        addAccessTokenCookie(headers, newAccess);
+        return ResponseEntity.ok().headers(headers).body(new LoginResponse(true, user.getRole().getName()));
+    }
+
+    public ResponseEntity<LoginResponse> logout(String accessToken) {
+        SecurityContextHolder.clearContext();
+        User user = userService.getUserByUsername(jwtTokenProvider.getUsername(accessToken));
+        revokeAllTokensOfUser(user);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, 
+        cookieUtil.deleteAccessTokenCookie().toString());
+        headers.add(HttpHeaders.SET_COOKIE, 
+        cookieUtil.deleteRefreshTokenCookie().toString());
+        return ResponseEntity.ok().headers(headers).body(new LoginResponse(false, null));
+
+    }
+
 }

@@ -35,4 +35,18 @@ public class AuthenticationController {
             return authService.login(loginRequest, access,refresh);
     }
     
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(
+        @CookieValue(name = "refresh_token", required = false)
+        String refresh) {
+            return authService.refresh(refresh);
+        }
+
+    @PostMapping("/logout")
+    public ResponseEntity<LoginResponse> logout(
+        @CookieValue(name = "access_token", required = false)
+        String access
+    ) {
+        return authService.logout(access);
+    }
 }
