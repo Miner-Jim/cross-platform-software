@@ -7,6 +7,10 @@ import com.example.demo.repository.DeviceRepository;
 import com.example.demo.service.DeviceService;
 import com.example.demo.service.UserService;
 
+import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -17,10 +21,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/devices") // Все URL начинаются с /api/devices
 public class DeviceController {
     
+    private static final Logger logger = LoggerFactory.getLogger(DeviceController.class);
     private final DeviceService deviceService;
     private final UserService userService;
     private final DeviceRepository deviceRepository;
@@ -41,6 +47,9 @@ public class DeviceController {
             @RequestParam(required = false) Boolean active,
             Authentication authentication, // ✅ Добавляем аутентификацию
             @PageableDefault(page = 0, size = 3, sort = "title") Pageable pageable) {
+
+         logger.debug("GET /api/devices - пользователь: {}, фильтры: title={}", 
+                   authentication.getName(), title);
         
         String username = authentication.getName();
         User user = userService.getUserByUsername(username);
@@ -61,10 +70,12 @@ public class DeviceController {
     // GET /api/devices/{id} - получить устройство по ID
     @GetMapping("/{id}")
     public ResponseEntity<Device> getDeviceById(@PathVariable Long id) {
+        logger.debug("GET /api/devices/{}", id);
         Device device = deviceService.getDeviceById(id);
         if (device != null) {
             return ResponseEntity.ok(device);
         } else {
+            logger.warn("Device ID {} not found", id);
             return ResponseEntity.notFound().build();
         }
     }
@@ -72,6 +83,7 @@ public class DeviceController {
     // POST /api/devices - создать новое устройство
     @PostMapping
     public ResponseEntity<Device> createDevice(@RequestBody Device device) {
+        logger.debug("POST /api/devices - creating device: {}", device);
         Device createdDevice = deviceService.createDevice(device);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDevice);
     }
@@ -79,10 +91,12 @@ public class DeviceController {
     // PUT /api/devices/{id} - обновить устройство
     @PutMapping("/{id}")
     public ResponseEntity<Device> updateDevice(@PathVariable Long id, @RequestBody Device deviceDetails) {
+        logger.debug("PUT /api/devices/{} - updating device: {}", id, deviceDetails);
         Device updatedDevice = deviceService.updateDevice(id, deviceDetails);
         if (updatedDevice != null) {
             return ResponseEntity.ok(updatedDevice);
         } else {
+            logger.warn("Device ID {} not found", id);
             return ResponseEntity.notFound().build();
         }
     }
@@ -90,10 +104,12 @@ public class DeviceController {
     // DELETE /api/devices/{id} - удалить устройство
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
+        logger.debug("DELETE /api/devices/{}", id);
         boolean deleted = deviceService.deleteDevice(id);
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
+            logger.warn("Device ID {} not found", id);
             return ResponseEntity.notFound().build();
         }
     }
