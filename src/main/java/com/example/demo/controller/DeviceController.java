@@ -1,10 +1,15 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.DeviceRequestDto;
+import com.example.demo.dto.DeviceResponseDto;
+import com.example.demo.mapper.DeviceMapper;
 import com.example.demo.model.Device;
 import com.example.demo.model.DeviceType;
+import com.example.demo.model.Room;
 import com.example.demo.model.User;
 import com.example.demo.repository.DeviceRepository;
 import com.example.demo.service.DeviceService;
+import com.example.demo.service.RoomService;
 import com.example.demo.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,74 +35,118 @@ public class DeviceController {
     private final DeviceService deviceService;
     private final UserService userService;
     private final DeviceRepository deviceRepository;
+     private final RoomService roomService;
     
-    public DeviceController(DeviceService deviceService, UserService userService, DeviceRepository deviceRepository) {
+    public DeviceController(DeviceService deviceService, UserService userService, 
+    DeviceRepository deviceRepository, RoomService roomService) {
         this.deviceService = deviceService;
         this.userService = userService;
         this.deviceRepository = deviceRepository;
+        this.roomService = roomService;
     }
     
-    // GET /api/devices - получить все устройства
+     // GET /api/devices - получить все устройства
     @GetMapping
-    public ResponseEntity<Page<Device>> getAllDevices(
+    public ResponseEntity<Page<DeviceResponseDto>> getAllDevices(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) DeviceType type,
             @RequestParam(required = false) Double minPower,
             @RequestParam(required = false) Double maxPower, 
             @RequestParam(required = false) Boolean active,
-            Authentication authentication, // ✅ Добавляем аутентификацию
+            Authentication authentication,
             @PageableDefault(page = 0, size = 3, sort = "title") Pageable pageable) {
 
-         logger.debug("GET /api/devices - пользователь: {}, фильтры: title={}", 
-                   authentication.getName(), title);
-        
         String username = authentication.getName();
         User user = userService.getUserByUsername(username);
         
         Page<Device> devices;
         
-        //USER видит устройства только из своих комнат
         if (user.getRole().getName().equals("USER")) {
             devices = deviceService.getDevicesByUserRoomsWithFilter(
                 user.getId(), title, type, minPower, maxPower, active, pageable);
         } else {
-             devices = deviceRepository.findAll(pageable);
+            devices = deviceRepository.findAll(pageable);
         }
         
-        return ResponseEntity.ok(devices);
+        // Конвертируем в DTO
+        Page<DeviceResponseDto> deviceDtos = devices.map(DeviceMapper::toDto);
+        return ResponseEntity.ok(deviceDtos);
     }
     
     // GET /api/devices/{id} - получить устройство по ID
     @GetMapping("/{id}")
-    public ResponseEntity<Device> getDeviceById(@PathVariable Long id) {
-        logger.debug("GET /api/devices/{}", id);
+    public ResponseEntity<DeviceResponseDto> getDeviceById(@PathVariable Long id) {
         Device device = deviceService.getDeviceById(id);
         if (device != null) {
-            return ResponseEntity.ok(device);
+            return ResponseEntity.ok(DeviceMapper.toDto(device));
         } else {
-            logger.warn("Device ID {} not found", id);
             return ResponseEntity.notFound().build();
         }
     }
     
-    // POST /api/devices - создать новое устройство
+   // POST /api/devices - создать новое устройство
     @PostMapping
-    public ResponseEntity<Device> createDevice(@RequestBody Device device) {
-        logger.debug("POST /api/devices - creating device: {}", device);
-        Device createdDevice = deviceService.createDevice(device);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdDevice);
+    public ResponseEntity<DeviceResponseDto> createDevice(@RequestBody DeviceRequestDto deviceRequest) {
+        logger.debug("POST /api/devices - creating device: {}", deviceRequest);
+        try {
+            // Конвертируем DTO в Entity
+            Device device = new Device();
+            device.setTitle(deviceRequest.title());
+            device.setType(deviceRequest.type());
+            device.setPower(deviceRequest.power());
+            device.setActive(deviceRequest.active());
+            
+            // Устанавливаем комнату, если указана
+            if (deviceRequest.roomId() != null) {
+                Room room = roomService.getRoomById(deviceRequest.roomId());
+                if (room == null) {
+                    logger.warn("Room with id {} not found", deviceRequest.roomId());
+                    return ResponseEntity.badRequest().build();
+                }
+                device.setRoom(room);
+            }
+            
+            Device createdDevice = deviceService.createDevice(device);
+            return ResponseEntity.status(HttpStatus.CREATED).body(DeviceMapper.toDto(createdDevice));
+            
+        } catch (Exception e) {
+            logger.error("Error creating device: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
     
     // PUT /api/devices/{id} - обновить устройство
     @PutMapping("/{id}")
-    public ResponseEntity<Device> updateDevice(@PathVariable Long id, @RequestBody Device deviceDetails) {
-        logger.debug("PUT /api/devices/{} - updating device: {}", id, deviceDetails);
-        Device updatedDevice = deviceService.updateDevice(id, deviceDetails);
-        if (updatedDevice != null) {
-            return ResponseEntity.ok(updatedDevice);
-        } else {
-            logger.warn("Device ID {} not found", id);
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<DeviceResponseDto> updateDevice(@PathVariable Long id, @RequestBody DeviceRequestDto deviceRequest) {
+        logger.debug("PUT /api/devices/{} - updating device: {}", id, deviceRequest);
+        
+        try {
+            Device deviceDetails = new Device();
+            deviceDetails.setTitle(deviceRequest.title());
+            deviceDetails.setType(deviceRequest.type());
+            deviceDetails.setPower(deviceRequest.power());
+            deviceDetails.setActive(deviceRequest.active());
+            
+            // Обновляем комнату, если указана
+            if (deviceRequest.roomId() != null) {
+                Room room = roomService.getRoomById(deviceRequest.roomId());
+                if (room == null) {
+                    logger.warn("Room with id {} not found", deviceRequest.roomId());
+                    return ResponseEntity.badRequest().build();
+                }
+                deviceDetails.setRoom(room);
+            }
+            
+            Device updatedDevice = deviceService.updateDevice(id, deviceDetails);
+            if (updatedDevice != null) {
+                return ResponseEntity.ok(DeviceMapper.toDto(updatedDevice));
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error updating device: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
     

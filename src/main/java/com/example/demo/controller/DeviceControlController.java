@@ -5,6 +5,9 @@ import com.example.demo.service.TemperatureService;
 
 import lombok.extern.slf4j.Slf4j;
 
+import com.example.demo.dto.DeviceResponseDto;
+import com.example.demo.dto.DeviceToggleDto;
+import com.example.demo.mapper.DeviceMapper;
 import com.example.demo.model.Device;
 import com.example.demo.model.DeviceType;
 
@@ -31,21 +34,18 @@ public class DeviceControlController {
         this.temperatureService = temperatureService;
     }
 
-    @PostMapping("/devices/{deviceId}/toggle")
-    public ResponseEntity<Device> toggleDevice(@PathVariable Long deviceId, 
-                                             @RequestBody Map<String, Boolean> request) {
-        logger.debug("POST/devices/{deviceId}/toggle Toggle device {}", deviceId);
-        Boolean active = request.get("active");
+      @PostMapping("/devices/{deviceId}/toggle")
+    public ResponseEntity<DeviceResponseDto> toggleDevice(@PathVariable Long deviceId, 
+                                             @RequestBody DeviceToggleDto request) {
+        Boolean active = request.active();
         if (active == null) {
-            logger.warn("Active state not provided");
             return ResponseEntity.badRequest().build();
         }
         
         Device device = deviceControlService.toggleDevice(deviceId, active);
         if (device != null) {
-            return ResponseEntity.ok(device);
+            return ResponseEntity.ok(DeviceMapper.toDto(device));
         } else {
-            logger.warn("Device not found");
             return ResponseEntity.notFound().build();
         }
     }
@@ -69,15 +69,17 @@ public class DeviceControlController {
     }
 
     @PostMapping("/type/{type}")
-    public ResponseEntity<List<Device>> toggleDevicesByType(@PathVariable DeviceType type,
-                                                          @RequestBody Map<String, Boolean> request) {
-        logger.debug("POST /api/control/type/{}", type);
-        Boolean active = request.get("active");
+    public ResponseEntity<List<DeviceResponseDto>> toggleDevicesByType(@PathVariable DeviceType type,
+                                                          @RequestBody DeviceToggleDto request) {
+        Boolean active = request.active();
         if (active == null) {
             return ResponseEntity.badRequest().build();
         }
         
         List<Device> devices = deviceControlService.toggleDevicesByType(type, active);
-        return ResponseEntity.ok(devices);
+        List<DeviceResponseDto> deviceDtos = devices.stream()
+                .map(DeviceMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(deviceDtos);
     }
 }

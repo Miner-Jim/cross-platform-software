@@ -17,8 +17,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dto.ChangePasswordDto;
 import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.LoginResponse;
 import com.example.demo.dto.UserDto;
@@ -54,6 +56,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final CookieUtil cookieUtil;
     private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
     private void addAccessTokenCookie(HttpHeaders headers, Token token) {
         headers.add(HttpHeaders.SET_COOKIE, 
@@ -144,5 +147,46 @@ public class AuthService {
         return ResponseEntity.ok().headers(headers).body(new LoginResponse(false, null));
 
     }
+
+    public ResponseEntity<String> changePassword(ChangePasswordDto changePasswordDto, String username) {
+        logger.info("Changing password for user: {}", username);
+        
+        try {
+            // Проверяем что новый пароль и подтверждение совпадают
+            if (!changePasswordDto.newPassword().equals(changePasswordDto.confirmPassword())) {
+                logger.warn("Password confirmation mismatch for user: {}", username);
+                return ResponseEntity.badRequest().body("New password and confirmation do not match");
+            }
+            
+            User user = userService.getUserByUsername(username);
+            if (user == null) {
+                logger.warn("User not found: {}", username);
+                return ResponseEntity.badRequest().body("User not found");
+            }
+            
+            // Проверяем текущий пароль
+            if (!passwordEncoder.matches(changePasswordDto.currentPassword(), user.getPassword())) {
+                logger.warn("Current password is incorrect for user: {}", username);
+                return ResponseEntity.badRequest().body("Current password is incorrect");
+            }
+            
+            // Проверяем что новый пароль не совпадает со старым
+            if (passwordEncoder.matches(changePasswordDto.newPassword(), user.getPassword())) {
+                logger.warn("New password cannot be the same as current password for user: {}", username);
+                return ResponseEntity.badRequest().body("New password must be different from current password");
+            }
+            
+            // Устанавливаем новый пароль
+            user.setPassword(passwordEncoder.encode(changePasswordDto.newPassword()));
+            userService.updateUser(user.getId(), user); 
+            
+            logger.info("Password successfully changed for user: {}", username);
+            return ResponseEntity.ok("Password changed successfully");
+            
+        } catch (Exception e) {
+            logger.error("Error changing password for user {}: {}", username, e.getMessage());
+            return ResponseEntity.internalServerError().body("Error changing password");
+        }
+}
 
 }
