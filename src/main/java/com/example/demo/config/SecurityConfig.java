@@ -68,6 +68,10 @@ public class SecurityConfig {
             // Mode rules - только админ
             authorize.requestMatchers("/api/mode-rules/**").hasAuthority("DEVICE:WRITE");
             
+            authorize.requestMatchers(HttpMethod.GET, "/api/files", "/api/files/**").hasAnyAuthority("FILE:READ");
+            authorize.requestMatchers(HttpMethod.POST, "/api/files").hasAuthority("FILE:WRITE");
+            authorize.requestMatchers(HttpMethod.DELETE, "/api/files/**").hasAuthority("FILE:WRITE");
+
             authorize.anyRequest().authenticated();
         });
 

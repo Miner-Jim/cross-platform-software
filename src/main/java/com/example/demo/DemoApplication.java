@@ -45,17 +45,20 @@ public class DemoApplication implements ApplicationRunner {
         Permission roomRead = createPermissionIfNotFound("ROOM", "READ");
         Permission roomWrite = createPermissionIfNotFound("ROOM", "WRITE");
         Permission modeControl = createPermissionIfNotFound("MODE", "CONTROL");
+        Permission fileRead = createPermissionIfNotFound("FILE", "READ");
+        Permission fileWrite = createPermissionIfNotFound("FILE", "WRITE");
 
         // роли с правильными permissions для УМНОГО ДОМА
         Role userRole = createRoleIfNotFound("USER", Set.of(
-            deviceRead, roomRead
+            deviceRead, roomRead, fileRead
         ));
         
         Role adminRole = createRoleIfNotFound("ADMIN", Set.of(
             userRead, userWrite, deviceRead, deviceWrite, 
-            roomRead, roomWrite, modeControl
+            roomRead, roomWrite, modeControl, fileRead, fileWrite
         ));
 
+        
         // Создаем пользователей с правильными ролями
         createUserIfNotFound("user", "user", userRole);
         createUserIfNotFound("admin", "admin", adminRole);
@@ -86,6 +89,8 @@ public class DemoApplication implements ApplicationRunner {
         }
         return role;
     }
+
+    
 
     private void createUserIfNotFound(String username, String password, Role role) {
         if (userRepository.findByUsername(username).isEmpty()) {
