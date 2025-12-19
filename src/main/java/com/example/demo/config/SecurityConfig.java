@@ -73,6 +73,7 @@ public class SecurityConfig {
             authorize.requestMatchers(HttpMethod.DELETE, "/api/files/**").hasAuthority("FILE:WRITE");
             authorize.requestMatchers(HttpMethod.POST, "/api/devices/upload-csv").hasAuthority("DEVICE:WRITE");
             authorize.requestMatchers(HttpMethod.POST, "/api/import/**").hasAuthority("DEVICE:WRITE");
+            authorize.requestMatchers(HttpMethod.GET, "/api/reports/**").hasAnyAuthority("FILE:READ", "DEVICE:READ");
 
             authorize.anyRequest().authenticated();
         });

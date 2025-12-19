@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${report.title}">Отчет</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .title { color: #2c3e50; font-size: 24px; }
+        .subtitle { color: #7f8c8d; font-size: 14px; }
+        .summary { background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px; }
+        .summary h3 { color: #34495e; }
+        .summary-item { margin: 10px 0; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .table th { background: #3498db; color: white; padding: 12px; text-align: left; }
+        .table td { padding: 10px; border-bottom: 1px solid #ddd; }
+        .table tr:nth-child(even) { background: #f2f2f2; }
+        .status-active { color: #27ae60; font-weight: bold; }
+        .status-inactive { color: #e74c3c; font-weight: bold; }
+        .footer { margin-top: 40px; text-align: center; color: #95a5a6; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title" th:text="${report.title}">Отчет по устройствам</h1>
+        <div class="subtitle">
+            Сгенерировано: <span th:text="${#temporals.format(report.generatedAt, 'dd.MM.yyyy HH:mm')}"></span>
+            | Пользователь: <span th:text="${report.generatedBy}"></span>
+        </div>
+    </div>
+    
+    <div class="summary" th:if="${report.summary}">
+        <h3>Сводная информация</h3>
+        <div class="summary-item">Всего устройств: <strong th:text="${report.summary['totalDevices']}">0</strong></div>
+        <div class="summary-item">Активных устройств: <strong th:text="${report.summary['activeDevices']}">0</strong></div>
+        <div class="summary-item">Общая мощность: <strong th:text="${report.summary['totalPower']}">0</strong> Вт</div>
+        <div class="summary-item">Мощность активных: <strong th:text="${report.summary['activePower']}">0</strong> Вт</div>
+    </div>
+    
+    <div th:if="${not report.details.empty}">
+        <h3>Детальная информация</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Тип</th>
+                    <th>Мощность (Вт)</th>
+                    <th>Статус</th>
+                    <th>Комната</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="device : ${report.details}">
+                    <td th:text="${device.id}">1</td>
+                    <td th:text="${device.title}">Устройство</td>
+                    <td th:text="${device.type}">Тип</td>
+                    <td th:text="${#numbers.formatDecimal(device.power, 1, 2)}">0.0</td>
+                    <td>
+                        <span th:if="${device.active}" class="status-active">ВКЛ</span>
+                        <span th:unless="${device.active}" class="status-inactive">ВЫКЛ</span>
+                    </td>
+                    <td th:text="${device.room}">Комната</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div th:if="${report.details.empty}" class="no-data">
+        <p>Нет данных для отображения</p>
+    </div>
+    
+    <div class="footer">
+        <p>Отчет сгенерирован автоматически системой "Умный дом"</p>
+        <p th:text="'Тип отчета: ' + ${report.reportType}"></p>
+    </div>
+</body>
+</html>

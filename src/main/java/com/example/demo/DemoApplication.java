@@ -66,6 +66,7 @@ public class DemoApplication implements ApplicationRunner {
         System.out.println("Умный дом: Данные инициализированы!");
         System.out.println("USER: user/user -> USER (только просмотр)");
         System.out.println("ADMIN: admin/admin -> ADMIN (полные права)");
+        
     }
 
     private Permission createPermissionIfNotFound(String resource, String operation) {
