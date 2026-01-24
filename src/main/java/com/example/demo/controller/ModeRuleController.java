@@ -4,6 +4,8 @@ import com.example.demo.model.ModeRule;
 import com.example.demo.model.ModeType;
 import com.example.demo.repository.ModeRuleRepository;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/mode-rules")
+@Tag(name = "Сценарии (правила)")
 public class ModeRuleController {
     private static final Logger logger = LoggerFactory.getLogger(ModeRuleController.class);
     private final ModeRuleRepository modeRuleRepository;
@@ -23,28 +26,28 @@ public class ModeRuleController {
     public ModeRuleController(ModeRuleRepository modeRuleRepository) {
         this.modeRuleRepository = modeRuleRepository;
     }
-
+    @Operation(summary = "Создать правило")
     @PostMapping
     public ResponseEntity<ModeRule> createRule(@RequestBody ModeRule rule) {
         logger.debug("POST/api/mode-rules");
         ModeRule savedRule = modeRuleRepository.save(rule);
         return ResponseEntity.ok(savedRule);
     }
-
+    @Operation(summary = "Получить правило по типу")
     @GetMapping("/mode/{modeType}")
     public ResponseEntity<List<ModeRule>> getRulesByMode(@PathVariable ModeType modeType) {
         logger.debug("GET/api/mode-rules/mode/{}", modeType);
         List<ModeRule> rules = modeRuleRepository.findByModeTypeOrderByPriorityDesc(modeType);
         return ResponseEntity.ok(rules);
     }
-
+    @Operation(summary = "Получить все правила")
     @GetMapping
     public ResponseEntity<List<ModeRule>> getAllRules() {
         logger.debug("GET/api/mode-rules");
         List<ModeRule> rules = modeRuleRepository.findAll();
         return ResponseEntity.ok(rules);
     }
-
+    @Operation(summary = "Обновить правило по ID")
     @PutMapping("/{id}")
     public ResponseEntity<ModeRule> updateRule(@PathVariable Long id, @RequestBody ModeRule ruleDetails) {
         logger.debug("PUT/api/mode-rules/{}", id);
@@ -61,7 +64,7 @@ public class ModeRuleController {
             })
             .orElse(ResponseEntity.notFound().build());
     }
-
+    @Operation(summary = "Удалить правило по ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRule(@PathVariable Long id) {
         logger.debug("DELETE/api/mode-rules/{}", id);

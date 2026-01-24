@@ -21,11 +21,14 @@ import com.example.demo.mapper.UserMapper;
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Пользователи")
 public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
@@ -35,6 +38,7 @@ public class UserController {
     }
 
     // GET /api/users - получить всех пользователей
+    @Operation(summary = "Получить всех пользователей")
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> getAllUsers() {
         logger.info("Getting all users");
@@ -51,6 +55,7 @@ public class UserController {
     }
 
     // GET /api/users/{id} - получить пользователя по ID
+    @Operation(summary = "Получить пользователя по ID")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         logger.debug("GET /api/users/{}", id);
@@ -69,6 +74,7 @@ public class UserController {
     }
 
     // POST /api/users - создать пользователя (основной метод)
+    @Operation(summary = "Создать пользователя")
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@RequestBody UserCreateDto userCreateDto) {
         logger.debug("POST /api/users - {}", userCreateDto);
@@ -85,24 +91,8 @@ public class UserController {
         }
     }
 
-    // POST /api/users/create - альтернативный метод создания
-    @PostMapping("/create")
-    public ResponseEntity<UserResponseDto> createUserAlternative(@RequestBody UserCreateDto userCreateDto) {
-        logger.debug("POST /api/users/create - {}", userCreateDto);
-        try {
-            User createdUser = userService.createUserWithRole(userCreateDto);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(UserMapper.toUserResponseDto(createdUser));
-        } catch (IllegalArgumentException e) {
-            logger.error("Error creating user: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            logger.error("Unexpected error creating user: {}", e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
     // PUT /api/users/{id} - обновить пользователя
+    @Operation(summary = "Обновить пользователя")
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long id, 
                                                      @RequestBody UserCreateDto userCreateDto) {
@@ -128,6 +118,7 @@ public class UserController {
     }
 
     // DELETE /api/users/{id} - удалить пользователя
+    @Operation(summary = "Удалить пользователя")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         logger.debug("DELETE /api/users/{}", id);
@@ -147,6 +138,7 @@ public class UserController {
     }
 
     // GET /api/users/username/{username} - дополнительный метод для поиска по username
+    @Operation(summary = "Получить пользователя по имени") 
     @GetMapping("/username/{username}")
     public ResponseEntity<UserResponseDto> getUserByUsername(@PathVariable String username) {
         logger.debug("GET /api/users/username/{}", username);

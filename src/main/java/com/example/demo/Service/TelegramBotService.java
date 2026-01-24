@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Device;
+import com.example.demo.model.Room;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,7 +21,7 @@ import java.util.List;
 @Slf4j
 @Service
 public class TelegramBotService extends TelegramLongPollingBot {
-    
+    private final RoomService roomService;
     private final DeviceService deviceService;
     private final DeviceControlService deviceControlService;
     
@@ -32,8 +34,9 @@ public class TelegramBotService extends TelegramLongPollingBot {
     public TelegramBotService(
             @Value("${telegram.bot.token}") String botToken,
             DeviceService deviceService, 
-            DeviceControlService deviceControlService) {
+            DeviceControlService deviceControlService, RoomService roomService) {
         super(botToken);
+        this.roomService = roomService;
         this.deviceService = deviceService;
         this.deviceControlService = deviceControlService;
         this.botTokenValue = botToken;
@@ -41,7 +44,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
     
     @PostConstruct
     public void init() {
-        log.info("Telegram Bot инициализирован. Имя: {}, Токен установлен: {}", 
+        log.info("Telegram Bot Initialize. Name: {}, Token: {}", 
                 botUsernameValue, 
                 botTokenValue != null && !botTokenValue.isEmpty());
     }
@@ -62,7 +65,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
             
-            log.info("Сообщение от {}: {}", update.getMessage().getFrom().getUserName(), messageText);
+            log.info("Message from {}: {}", update.getMessage().getFrom().getUserName(), messageText);
             
             if (messageText.equals("/start")) {
                 sendWelcomeWithButton(chatId);
@@ -103,21 +106,27 @@ public class TelegramBotService extends TelegramLongPollingBot {
             List<Device> allDevices = deviceService.getAllDevices();
             long activeDevices = allDevices.stream().filter(Device::isActive).count();
             double totalPower = deviceControlService.getTotalPowerConsumption();
-
+            List<Room> rooms = roomService.getAllRooms();
+            StringBuilder rom = new StringBuilder();
+            for (Room room : rooms) {
+                rom.append(room.getLocation()).append(", ");
+            }
             String status = String.format(
                 "*Статус Умного Дома:*\n" +
                 " Устройств всего: %d\n" +
                 " Сейчас работает: %d\n" +
-                " Потребление: %.1f Вт",
+                " Потребление: %.1f Вт\n" +
+                " Комнаты: %s\n",
                 allDevices.size(), 
                 activeDevices, 
-                totalPower
+                totalPower,
+                rom
             );
             
             sendSimpleMessage(chatId, status);
             
         } catch (Exception e) {
-            log.error("Ошибка: {}", e.getMessage());
+            log.error("Error: {}", e.getMessage());
             sendSimpleMessage(chatId, "Не могу получить данные");
         }
     }
@@ -134,7 +143,7 @@ public class TelegramBotService extends TelegramLongPollingBot {
         try {
             execute(message);
         } catch (TelegramApiException e) {
-            log.error("Ошибка отправки: {}", e.getMessage());
+            log.error("Send error: {}", e.getMessage());
         }
     }
 }

@@ -15,13 +15,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Аутентификация")
 public class AuthenticationController {
 
     private final AuthService authService;
-    
+    @Operation(summary = "Вход в систему")
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
         @CookieValue(name = "access_token", required = false) String access,
@@ -29,19 +33,19 @@ public class AuthenticationController {
         @RequestBody LoginRequest loginRequest) {
             return authService.login(loginRequest, access, refresh);
     }
-    
+    @Operation(summary = "Обновление токена")
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(
         @CookieValue(name = "refresh_token", required = false) String refresh) {
             return authService.refresh(refresh);
     }
-
+    @Operation(summary = "Выход из системы")
     @PostMapping("/logout")
     public ResponseEntity<LoginResponse> logout(
         @CookieValue(name = "access_token", required = false) String access) {
         return authService.logout(access);
     }
-
+    @Operation(summary = "Смена пароля")
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(
             @RequestBody ChangePasswordDto changePasswordDto,

@@ -14,6 +14,8 @@ import com.example.demo.service.DeviceService;
 import com.example.demo.service.RoomService;
 import com.example.demo.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RestController
 @RequestMapping("/api/devices") // Все URL начинаются с /api/devices
+@Tag(name = "Устройства")
 public class DeviceController {
     
     private static final Logger logger = LoggerFactory.getLogger(DeviceController.class);
@@ -55,6 +58,7 @@ public class DeviceController {
     }
     
      // GET /api/devices - получить все устройства
+    @Operation(summary = "Получить все устройства")
     @GetMapping
     public ResponseEntity<Page<DeviceResponseDto>> getAllDevices(
             @RequestParam(required = false) String title,
@@ -63,7 +67,7 @@ public class DeviceController {
             @RequestParam(required = false) Double maxPower, 
             @RequestParam(required = false) Boolean active,
             Authentication authentication,
-            @PageableDefault(page = 0, size = 3, sort = "title") Pageable pageable) {
+            @PageableDefault(page = 0, size = 3) Pageable pageable) {
 
         String username = authentication.getName();
         User user = userService.getUserByUsername(username);
@@ -83,6 +87,7 @@ public class DeviceController {
     }
     
     // GET /api/devices/{id} - получить устройство по ID
+    @Operation(summary = "Получить устройство по ID")
     @GetMapping("/{id}")
     public ResponseEntity<DeviceResponseDto> getDeviceById(@PathVariable Long id) {
         Device device = deviceService.getDeviceById(id);
@@ -94,6 +99,7 @@ public class DeviceController {
     }
     
    // POST /api/devices - создать новое устройство
+    @Operation(summary = "Создать устройство")
     @PostMapping
     public ResponseEntity<DeviceResponseDto> createDevice(@RequestBody DeviceRequestDto deviceRequest) {
         logger.debug("POST /api/devices - creating device: {}", deviceRequest);
@@ -125,6 +131,7 @@ public class DeviceController {
     }
     
     // PUT /api/devices/{id} - обновить устройство
+    @Operation(summary = "Обновить устройство")
     @PutMapping("/{id}")
     public ResponseEntity<DeviceResponseDto> updateDevice(@PathVariable Long id, @RequestBody DeviceRequestDto deviceRequest) {
         logger.debug("PUT /api/devices/{} - updating device: {}", id, deviceRequest);
@@ -160,6 +167,7 @@ public class DeviceController {
     }
     
     // DELETE /api/devices/{id} - удалить устройство
+    @Operation(summary = "Удалить устройство")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
         logger.debug("DELETE /api/devices/{}", id);
@@ -171,7 +179,7 @@ public class DeviceController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    @Operation(summary = "Импорт из CSV")
     @PostMapping(value = "/import/csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CsvImportDto> importDevicesFromCsv(
             @RequestParam("file") MultipartFile file,

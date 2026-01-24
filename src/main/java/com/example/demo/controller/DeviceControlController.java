@@ -3,6 +3,8 @@ package com.example.demo.controller;
 import com.example.demo.service.DeviceControlService;
 import com.example.demo.service.TemperatureService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 import com.example.demo.dto.DeviceResponseDto;
@@ -22,6 +24,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/api/control")
+@Tag(name = "Управление")
 public class DeviceControlController {
 
     private static final Logger logger = LoggerFactory.getLogger(DeviceControlController.class);
@@ -33,7 +36,7 @@ public class DeviceControlController {
         this.deviceControlService = deviceControlService;
         this.temperatureService = temperatureService;
     }
-
+      @Operation(summary = "Включить/выключить устройство")
       @PostMapping("/devices/{deviceId}/toggle")
     public ResponseEntity<DeviceResponseDto> toggleDevice(@PathVariable Long deviceId, 
                                              @RequestBody DeviceToggleDto request) {
@@ -51,6 +54,7 @@ public class DeviceControlController {
     }
 
     // Управление по температуре
+    @Operation(summary = "Управление по температуре")
     @PostMapping("/temperature")
     public ResponseEntity<String> controlByTemperature(@RequestBody Map<String, Object> request) {
         logger.debug("POST /api/control/temperature");
@@ -60,14 +64,14 @@ public class DeviceControlController {
         String result = temperatureService.controlByTemperature(roomId, temperature);
         return ResponseEntity.ok(result);
     }
-
+    @Operation(summary = "Получить суммарное потребление")
     @GetMapping("/power")
     public ResponseEntity<Map<String, Double>> getTotalPower() {
         logger.debug("GET /api/control/power");
         double totalPower = deviceControlService.getTotalPowerConsumption();
         return ResponseEntity.ok(Map.of("totalPower", totalPower));
     }
-
+    @Operation(summary = "Управление по типу устройства")
     @PostMapping("/type/{type}")
     public ResponseEntity<List<DeviceResponseDto>> toggleDevicesByType(@PathVariable DeviceType type,
                                                           @RequestBody DeviceToggleDto request) {

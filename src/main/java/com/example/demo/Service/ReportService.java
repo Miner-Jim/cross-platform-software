@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.dto.ReportDto;
 import com.example.demo.model.Device;
 import com.example.demo.model.DeviceType;
+import com.itextpdf.text.pdf.BaseFont;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -124,6 +126,11 @@ public class ReportService {
             
             //Конвертируем HTML в PDF
             ITextRenderer renderer = new ITextRenderer();
+            renderer.getFontResolver().addFont(
+            "c:/windows/fonts/arial.ttf", 
+            BaseFont.IDENTITY_H, 
+            BaseFont.NOT_EMBEDDED
+        );
             renderer.setDocumentFromString(htmlContent);
             renderer.layout();
             

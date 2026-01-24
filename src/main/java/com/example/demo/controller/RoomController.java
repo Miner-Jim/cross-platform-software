@@ -10,6 +10,8 @@ import com.example.demo.service.CsvParserUtil;
 import com.example.demo.service.RoomService;
 import com.example.demo.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.csv.CSVRecord;
@@ -28,6 +30,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/rooms")
+@Tag(name = "Комнаты")
 public class RoomController {
     private static final Logger logger = LoggerFactory.getLogger(RoomController.class);
     private final RoomService roomService;
@@ -39,7 +42,7 @@ public class RoomController {
         this.userService = userService;
         this.csvParserUtil = csvParserUtil;
     }
-
+    @Operation(summary = "Получить все комнаты")
     @GetMapping
     public List<RoomDto> getAllRooms(Authentication authentication) {
         logger.debug("GET /api/rooms"); 
@@ -59,7 +62,7 @@ public class RoomController {
                 .map(RoomMapper::toDto)
                 .toList();
     }
-
+    @Operation(summary = "Получить комнату по ID")
     @GetMapping("/{id}")
     public ResponseEntity<RoomDto> getRoomById(@PathVariable Long id, Authentication authentication) {
         logger.debug("GET /api/rooms/{}", id);
@@ -80,7 +83,7 @@ public class RoomController {
         
         return ResponseEntity.ok(RoomMapper.toDto(room));
     }
-
+    @Operation(summary = "Создать комнату")
     @PostMapping
     public ResponseEntity<RoomDto> createRoom(@RequestBody RoomCreateDto roomCreateDto) {
         logger.debug("POST /api/rooms - {}", roomCreateDto);
@@ -108,6 +111,7 @@ public class RoomController {
     }
     
     // PUT /api/rooms/{id} - обновить комнату
+    @Operation(summary = "Обновить комнату по ID")
     @PutMapping("/{id}")
     public ResponseEntity<RoomDto> updateRoom(@PathVariable Long id, @RequestBody RoomCreateDto roomCreateDto) {
         logger.debug("PUT /api/rooms/{} - {}", id, roomCreateDto);
@@ -135,6 +139,7 @@ public class RoomController {
     }
     
     // DELETE /api/rooms/{id} - удалить комнату
+    @Operation(summary = "Удалить комнату по ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
         logger.debug("DELETE /api/rooms/{}", id);
@@ -146,7 +151,7 @@ public class RoomController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    @Operation(summary = "Импортирование комнат через csv")
     @PostMapping(value = "/import/csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CsvImportDto> importRoomsFromCsv(
             @RequestParam("file") MultipartFile file,

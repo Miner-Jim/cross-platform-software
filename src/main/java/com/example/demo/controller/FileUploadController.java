@@ -4,6 +4,9 @@ import com.example.demo.dto.FileUploadResponseDto;
 import com.example.demo.mapper.FileMapper;
 import com.example.demo.model.File;
 import com.example.demo.service.FileStorageService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/api/files")
+@Tag(name = "Загрузка файлов")
 public class FileUploadController {
 
     private final FileStorageService fileStorageService;
@@ -32,7 +36,7 @@ public class FileUploadController {
     public FileUploadController(FileStorageService fileStorageService) {
         this.fileStorageService = fileStorageService;
     }
-
+    @Operation(summary = "Загрузка файла")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadFile(
             @RequestParam("file") MultipartFile file,
@@ -68,7 +72,7 @@ public class FileUploadController {
             ));
         }
     }
-
+    @Operation(summary = "Получить файл по ID")
     @GetMapping("/{fileId}")
     public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
         log.debug("GET /api/files/{} - downloading file", fileId);
@@ -102,7 +106,7 @@ public class FileUploadController {
         }
     }
 
-
+    @Operation(summary = "Получить информацию о файле")
     @GetMapping("/{fileId}/info")
     public ResponseEntity<FileUploadResponseDto> getFileInfo(@PathVariable Long fileId) {
         log.debug("GET /api/files/{}/info - getting file info", fileId);
@@ -131,7 +135,7 @@ public class FileUploadController {
             return ResponseEntity.internalServerError().build();
         }
     }
-
+    @Operation(summary = "Показать допустимые расширения")
     @GetMapping("/allowed-types")
     public ResponseEntity<Map<String, Object>> getAllowedFileTypes() {
         log.debug("GET /api/files/allowed-types - getting allowed file types");
@@ -144,7 +148,7 @@ public class FileUploadController {
         
         return ResponseEntity.ok(response);
     }
-
+    @Operation(summary = "Удалить файл по ID")
     @DeleteMapping("/{fileId}")
     public ResponseEntity<Void> deleteFile(@PathVariable Long fileId, Authentication authentication) {
         log.debug("DELETE /api/files/{} - deleting file", fileId);
@@ -169,7 +173,7 @@ public class FileUploadController {
             return ResponseEntity.internalServerError().build();
         }
     }
-
+    @Operation(summary = "Получить тип файла")
     @GetMapping("/{fileId}/content-type")
     public ResponseEntity<String> getFileContentType(@PathVariable Long fileId) {
         log.debug("GET /api/files/{}/content-type", fileId);
@@ -181,7 +185,7 @@ public class FileUploadController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    @Operation(summary = "Получить размер файла")
     @GetMapping("/{fileId}/size")
     public ResponseEntity<Long> getFileSize(@PathVariable Long fileId) {
         log.debug("GET /api/files/{}/size", fileId);
