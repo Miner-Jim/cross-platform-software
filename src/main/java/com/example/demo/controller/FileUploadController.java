@@ -122,19 +122,6 @@ public class FileUploadController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<FileUploadResponseDto>> getUserFiles(Authentication authentication) {
-        log.debug("GET /api/files - getting user files");
-        
-        try {
-            String username = authentication.getName();
-            return ResponseEntity.ok(List.of());
-            
-        } catch (Exception e) {
-            log.error("Error getting user files: {}", e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
-    }
     @Operation(summary = "Показать допустимые расширения")
     @GetMapping("/allowed-types")
     public ResponseEntity<Map<String, Object>> getAllowedFileTypes() {
